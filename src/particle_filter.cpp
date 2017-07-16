@@ -20,11 +20,33 @@
 using namespace std;
 
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
-	// TODO: Set the number of particles. Initialize all particles to first position (based on estimates of 
-	//   x, y, theta and their uncertainties from GPS) and all weights to 1. 
-	// Add random Gaussian noise to each particle.
-	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
+	num_particles = 100;
+	double init_weight_ = 1.0;
 
+	particles.resize(num_particles);
+	weights.resize(num_particles);
+
+	default_random_engine gen;
+	double std_x, std_y, std_theta; // Standard deviations for x, y, and psi
+	std_x = std[0];
+	std_y = std[1];
+	std_theta = std[2];
+
+	// This line creates a normal (Gaussian) distribution for x
+	normal_distribution<double> dist_x(x, std_x);
+	normal_distribution<double> dist_y(y, std_y);
+	normal_distribution<double> dist_theta(theta, std_theta);
+
+	// Adding noise to each particle and setting all weights to 1
+	for (int i = 0; i < num_particles; ++i) {
+		particles[i].id = i;
+		particles[i].x = dist_x(gen);
+		particles[i].y = dist_y(gen);
+		particles[i].theta = dist_theta(gen);
+		particles[i].weight = init_weight_;
+	}
+
+	is_initialized = true;
 }
 
 void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
